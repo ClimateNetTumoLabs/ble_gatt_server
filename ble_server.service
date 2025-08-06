@@ -1,0 +1,13 @@
+[Unit]
+Description=BLE GATT Server
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/raspberry/workspace/ble_gatt_server/server.py
+WorkingDirectory=/home/raspberry/workspace/ble_gatt_server
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
