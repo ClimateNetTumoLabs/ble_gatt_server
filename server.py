@@ -332,7 +332,7 @@ class MyCharacteristic(dbus.service.Object):
             self.service.notify_char.send_notification(output)
 
             # Connect to Wi-Fi using NetworkManager CLI
-            command = f"nmcli device wifi connect '{ssid}' password '{password}'"
+            command = f"sudo nmcli device wifi connect '{ssid}' password '{password}'"
             result = subprocess.run(command, shell=True, capture_output=True, text=True)
 
             if result.returncode == 0:
