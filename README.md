@@ -51,7 +51,7 @@ Make sure Bluetooth is enabled and your Wi-Fi adapter supports scanning and conn
 The script requires root privileges to scan Wi-Fi and manage connections:
 
 ```bash
-sudo python3 ble_gatt_server.py
+sudo python3 server.py
 ```
 
 ## Usage
