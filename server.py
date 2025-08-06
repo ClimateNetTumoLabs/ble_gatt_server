@@ -187,7 +187,7 @@ class NotifyCharacteristic(dbus.service.Object):
         Called by the client to subscribe to notifications.
         """
         self.notifying = True
-        print("🔔 StartNotify called")
+        print("🔔 StartNotify called", flush=True)
 
     @dbus.service.method(GATT_CHRC_IFACE, in_signature='', out_signature='')
     def StopNotify(self):
@@ -195,7 +195,7 @@ class NotifyCharacteristic(dbus.service.Object):
         Called by the client to unsubscribe from notifications.
         """
         self.notifying = False
-        print("🔕 StopNotify called")
+        print("🔕 StopNotify called", flush=True)
 
     def send_notification(self, message: str):
         """
@@ -203,7 +203,7 @@ class NotifyCharacteristic(dbus.service.Object):
         Converts string to list of dbus.Bytes and sends via PropertiesChanged signal.
         """
         if not self.notifying:
-            print("⚠️ Cannot notify, client hasn't subscribed")
+            print("⚠️ Cannot notify, client hasn't subscribed", flush=True)
             return
 
         # Convert message to bytes and update characteristic value
@@ -282,7 +282,7 @@ class MyCharacteristic(dbus.service.Object):
 
         try:
             text = bytes(value).decode('utf-8')  # Convert byte array to string
-            print(f"📥 WriteValue: {text}")
+            print(f"📥 WriteValue: {text}", flush=True)
 
             if text == 'SCAN_WIFI':
                 # Run a scan using iwlist
@@ -290,10 +290,10 @@ class MyCharacteristic(dbus.service.Object):
                     networks = scan_networks()
 
                     if not networks:
-                        print('not networks')
+                        print('not networks', flush=True)
                         raise Exception('Failed to scan networks')
 
-                    print(networks)
+                    print(networks, flush=True)
 
                     # Convert list of networks to JSON string
                     json_str = json.dumps(networks)
@@ -302,19 +302,19 @@ class MyCharacteristic(dbus.service.Object):
                     self.service.notify_char.send_notification(json_str)
 
                 except Exception as e:
-                    print(f'Some error happend: {e}', e)
+                    print(f'Some error happend: {e}', e, flush=True)
                 return
 
             # Try to parse incoming data as JSON
             data = json.loads(text)
-            print(f"✅ Parsed JSON: {data}")
+            print(f"✅ Parsed JSON: {data}", flush=True)
 
             ssid = data.get('ssid')
             password = data.get('password')
-            print(f"📡 SSID: {ssid}, 🔑 Password: {password}")
+            print(f"📡 SSID: {ssid}, 🔑 Password: {password}", flush=True)
 
             if not ssid or not password:
-                print("❌ Missing SSID or password")
+                print("❌ Missing SSID or password", flush=True)
                 return
 
             # Run a Wi-Fi scan and optionally notify
@@ -328,7 +328,7 @@ class MyCharacteristic(dbus.service.Object):
             else:
                 output = f"Error: {result.stderr.strip()}"
 
-            print("🔹 Notifying via Bluetooth...")
+            print("🔹 Notifying via Bluetooth...", flush=True)
             self.service.notify_char.send_notification(output)
 
             # Connect to Wi-Fi using NetworkManager CLI
@@ -336,18 +336,18 @@ class MyCharacteristic(dbus.service.Object):
             result = subprocess.run(command, shell=True, capture_output=True, text=True)
 
             if result.returncode == 0:
-                print("✅ Wi-Fi credentials accepted")
+                print("✅ Wi-Fi credentials accepted", flush=True)
                 self.service.notify_char.send_notification("✅ Connected to Wi-Fi")
             else:
-                print("❌ Failed to connect to Wi-Fi")
+                print("❌ Failed to connect to Wi-Fi", flush=True)
                 self.service.notify_char.send_notification("❌ Failed to connect")
-                print("✅ Wi-Fi config updated. Reconnect on next boot or reconfigure now.")
+                print("✅ Wi-Fi config updated. Reconnect on next boot or reconfigure now.", flush=True)
 
         except json.JSONDecodeError as e:
-            print(f"❌ JSON decode error: {e}")
+            print(f"❌ JSON decode error: {e}", flush=True)
         except Exception as e:
-            print(e)
-            print(f"📥 WriteValue (raw): {list(value)}")
+            print(e, flush=True)
+            print(f"📥 WriteValue (raw): {list(value)}", flush=True)
 
         # Store last written value
         self.value = value
@@ -357,7 +357,7 @@ class MyCharacteristic(dbus.service.Object):
         """
         Called when a BLE client reads the value of this characteristic.
         """
-        print("📤 ReadValue called")
+        print("📤 ReadValue called", flush=True)
         return self.value
 
     @dbus.service.method('org.freedesktop.DBus.Properties', in_signature='ss', out_signature='v')
@@ -444,7 +444,7 @@ class Advertisement(dbus.service.Object):
         release this advertisement object.
         Useful for cleanup or logging.
         """
-        print("❌ Advertisement released")
+        print("❌ Advertisement released", flush=True)
 
 
 # ── Helpers & Main ───────────────────────────────────────────────────────────
@@ -475,25 +475,25 @@ def register_app_cb():
     """
     Callback invoked by BlueZ upon successful registration of the GATT application.
     """
-    print("✅ GATT application registered")
+    print("✅ GATT application registered", flush=True)
 
 def register_app_error_cb(error):
     """
     Callback invoked if GATT application registration fails.
     """
-    print("❌ Failed to register application:", error)
+    print("❌ Failed to register application:", error, flush=True)
 
 def register_ad_cb():
     """
     Callback invoked when the advertisement is successfully registered with BlueZ.
     """
-    print("📣 Advertisement registered")
+    print("📣 Advertisement registered", flush=True)
 
 def register_ad_error_cb(error):
     """
     Callback invoked if advertisement registration fails.
     """
-    print("❌ Failed to register advertisement:", error)
+    print("❌ Failed to register advertisement:", error, flush=True)
 
 # ── Wi-Fi Scanner ─────────────────────────────────────────────────────────────
 # This function scans available Wi-Fi networks using the `iwlist` command
@@ -532,7 +532,7 @@ def scan_networks():
         return unique_networks
 
     except subprocess.CalledProcessError as e:
-        print("Failed to scan Wi-Fi:", e)
+        print("Failed to scan Wi-Fi:", e, flush=True)
         return []
 
 def main():
@@ -546,7 +546,7 @@ def main():
     # Find the Bluetooth adapter's D-Bus object path (e.g., '/org/bluez/hci0')
     adapter = find_adapter(bus)
     if not adapter:
-        print("❌ No Bluetooth adapter found")
+        print("❌ No Bluetooth adapter found", flush=True)
         return  # Exit if no Bluetooth hardware is available
 
     # Create instances of your GATT application and advertisement
@@ -568,7 +568,7 @@ def main():
     # Sleep a bit to let BlueZ settle and be ready for registration calls
     time.sleep(1)
 
-    print("ℹ️  Registering GATT application …")
+    print("ℹ️  Registering GATT application …", flush=True)
     # Register your GATT Application with BlueZ asynchronously
     svc_m.RegisterApplication(
         app.get_path(),
@@ -577,7 +577,7 @@ def main():
         error_handler=register_app_error_cb
     )
 
-    print("ℹ️  Registering Advertisement …")
+    print("ℹ️  Registering Advertisement …", flush=True)
     # Register your Advertisement object with BlueZ asynchronously
     adv_m.RegisterAdvertisement(
         adv.get_path(),
