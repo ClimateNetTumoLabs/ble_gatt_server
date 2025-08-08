@@ -113,6 +113,16 @@ This project is open-source under the MIT License.
 - BLE and GATT concepts inspired by Bluetooth SIG specs.
 
 ---
+## Developer Notes 🛠️ (To Do)
+
+- Need to refactor whole code
+- Split into logical files
+- Add additional functionality
+- Add status management in case of success or failure
+- Need to generate and change service and characteristics UUID
+- Add logging part
+- ...
+---
 
 ## Contact
 
